@@ -501,6 +501,16 @@ kbd {
   text-align: left;
 }
 
+@media (max-width: 420px) {
+  .emptyState {
+    padding: 16px 0;
+  }
+
+  .emptyCard {
+    padding: 16px;
+  }
+}
+
 .emptyTitle {
   margin: 0;
   font-size: 18px;
