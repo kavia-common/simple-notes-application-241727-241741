@@ -5,6 +5,7 @@ import NotesList from "./components/NotesList";
 import NoteEditorModal from "./components/NoteEditorModal";
 import EmptyState from "./components/EmptyState";
 import FloatingActionButton from "./components/FloatingActionButton";
+import Sidebar from "./components/Sidebar";
 import {
   createEmptyDraft,
   createNoteFromDraft,
@@ -32,6 +33,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState("all");
   const [theme, setTheme] = useState("light");
+  const [pinnedOnly, setPinnedOnly] = useState(false);
 
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState(null);
@@ -91,6 +93,7 @@ export default function App() {
 
     return notes
       .filter((n) => {
+        if (pinnedOnly && !Boolean(n && n.pinned)) return false;
         if (activeTag === "all") return true;
         return (n.tags || []).includes(activeTag);
       })
@@ -107,7 +110,7 @@ export default function App() {
         if (bp !== ap) return bp - ap;
         return (b.updatedAt || 0) - (a.updatedAt || 0);
       });
-  }, [notes, query, activeTag]);
+  }, [notes, query, activeTag, pinnedOnly]);
 
   const editingNote = useMemo(() => {
     if (!editingNoteId) return null;
@@ -191,33 +194,49 @@ export default function App() {
         onThemeToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
         onCreate={openCreate}
       />
-      <NotesHeader
-        query={query}
-        onQueryChange={setQuery}
-        tags={allTags}
-        activeTag={activeTag}
-        onTagChange={setActiveTag}
-        theme={theme}
-        onThemeToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-      />
+      <div className="layout">
+        <Sidebar
+          query={query}
+          onQueryChange={setQuery}
+          tags={allTags}
+          activeTag={activeTag}
+          onTagChange={setActiveTag}
+          pinnedOnly={pinnedOnly}
+          onPinnedOnlyChange={setPinnedOnly}
+          notesCount={notes.length}
+          filteredCount={filteredNotes.length}
+        />
 
-      <main className="main">
-        {filteredNotes.length === 0 ? (
-          <EmptyState
-            hasNotes={notes.length > 0}
-            onCreate={openCreate}
+        <div className="content">
+          <NotesHeader
             query={query}
+            onQueryChange={setQuery}
+            tags={allTags}
             activeTag={activeTag}
+            onTagChange={setActiveTag}
+            theme={theme}
+            onThemeToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
           />
-        ) : (
-          <NotesList
-            notes={filteredNotes}
-            onEdit={openEdit}
-            onDelete={deleteNote}
-            onTogglePin={togglePin}
-          />
-        )}
-      </main>
+
+          <main className="main">
+            {filteredNotes.length === 0 ? (
+              <EmptyState
+                hasNotes={notes.length > 0}
+                onCreate={openCreate}
+                query={query}
+                activeTag={activeTag}
+              />
+            ) : (
+              <NotesList
+                notes={filteredNotes}
+                onEdit={openEdit}
+                onDelete={deleteNote}
+                onTogglePin={togglePin}
+              />
+            )}
+          </main>
+        </div>
+      </div>
 
       <FloatingActionButton onClick={openCreate} label="Add note" />
 
