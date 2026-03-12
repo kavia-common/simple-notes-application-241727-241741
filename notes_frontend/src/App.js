@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import Navbar from "./components/Navbar";
 import NotesHeader from "./components/NotesHeader";
 import NotesList from "./components/NotesList";
 import NoteEditorModal from "./components/NoteEditorModal";
@@ -164,6 +165,11 @@ export default function App() {
 
   return (
     <div className="appRoot">
+      <Navbar
+        theme={theme}
+        onThemeToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+        onCreate={openCreate}
+      />
       <NotesHeader
         query={query}
         onQueryChange={setQuery}
