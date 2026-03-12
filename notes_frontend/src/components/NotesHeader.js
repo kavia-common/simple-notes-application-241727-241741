@@ -1,4 +1,5 @@
 import React from "react";
+import ThemeToggle from "./ThemeToggle";
 
 export default function NotesHeader({
   query,
@@ -6,6 +7,8 @@ export default function NotesHeader({
   tags,
   activeTag,
   onTagChange,
+  theme,
+  onThemeToggle,
 }) {
   return (
     <header className="header">
@@ -18,19 +21,23 @@ export default function NotesHeader({
           </div>
         </div>
 
-        <div className="searchWrap">
-          <label className="srOnly" htmlFor="search">
-            Search notes
-          </label>
-          <input
-            id="search"
-            className="searchInput"
-            placeholder="Search by title, content, or tag…"
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            inputMode="search"
-            autoComplete="off"
-          />
+        <div className="headerActions">
+          <div className="searchWrap">
+            <label className="srOnly" htmlFor="search">
+              Search notes
+            </label>
+            <input
+              id="search"
+              className="searchInput"
+              placeholder="Search by title, content, or tag…"
+              value={query}
+              onChange={(e) => onQueryChange(e.target.value)}
+              inputMode="search"
+              autoComplete="off"
+            />
+          </div>
+
+          <ThemeToggle theme={theme} onToggle={onThemeToggle} />
         </div>
       </div>
 

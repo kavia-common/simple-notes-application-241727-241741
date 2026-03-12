@@ -10,8 +10,10 @@ import {
   updateNoteFromDraft,
 } from "./domain/note";
 import { loadNotes, saveNotes } from "./persistence/notesStorage";
+import { loadTheme, saveTheme } from "./persistence/themeStorage";
 
 const STORAGE_KEY = "simple-notes-app::notes";
+const THEME_STORAGE_KEY = "simple-notes-app::theme";
 
 /**
  * Generates a reasonably unique id without external dependencies.
@@ -28,6 +30,7 @@ export default function App() {
   const [notes, setNotes] = useState([]);
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState("all");
+  const [theme, setTheme] = useState("light");
 
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState(null);
@@ -41,10 +44,29 @@ export default function App() {
     }
   }, []);
 
+  // Load theme from localStorage on first render
+  useEffect(() => {
+    const storedTheme = loadTheme(THEME_STORAGE_KEY);
+    if (storedTheme) {
+      setTheme(storedTheme);
+    }
+  }, []);
+
   // Persist on change
   useEffect(() => {
     saveNotes(STORAGE_KEY, notes);
   }, [notes]);
+
+  // Persist theme selection
+  useEffect(() => {
+    saveTheme(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  // Apply theme to the document for CSS to pick up.
+  useEffect(() => {
+    // Use <html> so modals/overlays and body background follow consistently.
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   const allTags = useMemo(() => {
     const tagSet = new Set();
@@ -148,6 +170,8 @@ export default function App() {
         tags={allTags}
         activeTag={activeTag}
         onTagChange={setActiveTag}
+        theme={theme}
+        onThemeToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
       />
 
       <main className="main">
