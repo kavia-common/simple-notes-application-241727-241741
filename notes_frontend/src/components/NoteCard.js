@@ -8,18 +8,35 @@ function excerpt(text, maxLen) {
   return `${t.slice(0, maxLen).trim()}…`;
 }
 
-export default function NoteCard({ note, onEdit, onDelete }) {
+export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
   const updatedLabel = useMemo(() => formatDateTime(note.updatedAt), [note.updatedAt]);
+  const isPinned = Boolean(note && note.pinned);
 
   return (
-    <article className="card">
+    <article className={`card ${isPinned ? "cardPinned" : ""}`}>
       <div className="cardTop">
         <div className="cardTitleWrap">
-          <h2 className="cardTitle">{note.title || "Untitled"}</h2>
+          <h2 className="cardTitle">
+            {note.title || "Untitled"}{" "}
+            {isPinned ? (
+              <span className="pinBadge" aria-label="Pinned note" title="Pinned">
+                Pinned
+              </span>
+            ) : null}
+          </h2>
           <p className="cardMeta">Updated {updatedLabel}</p>
         </div>
 
         <div className="cardActions">
+          <button
+            type="button"
+            className={`iconButton ${isPinned ? "isPinned" : ""}`}
+            onClick={() => onTogglePin && onTogglePin(note.id)}
+            aria-label={isPinned ? "Unpin note" : "Pin note"}
+            title={isPinned ? "Unpin" : "Pin"}
+          >
+            {isPinned ? "Unpin" : "Pin"}
+          </button>
           <button
             type="button"
             className="iconButton"

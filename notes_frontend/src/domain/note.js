@@ -37,6 +37,9 @@ export function createNoteFromDraft({ id, draft, now }) {
     title,
     body,
     tags: parseTags(draft.tagsText || ""),
+    // New capability: pinned notes appear first in the list.
+    // Persisted in localStorage as part of the note object.
+    pinned: false,
     createdAt: now,
     updatedAt: now,
   };

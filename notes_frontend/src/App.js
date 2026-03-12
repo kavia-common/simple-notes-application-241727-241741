@@ -41,7 +41,12 @@ export default function App() {
   useEffect(() => {
     const stored = loadNotes(STORAGE_KEY);
     if (stored && Array.isArray(stored)) {
-      setNotes(stored);
+      // Migrate older notes to include `pinned` (defaults to false).
+      const migrated = stored.map((n) => ({
+        ...n,
+        pinned: Boolean(n && n.pinned),
+      }));
+      setNotes(migrated);
     }
   }, []);
 
@@ -95,7 +100,13 @@ export default function App() {
         return haystack.includes(q);
       })
       .slice()
-      .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+      .sort((a, b) => {
+        // Pinned notes first, then most recently updated.
+        const ap = a && a.pinned ? 1 : 0;
+        const bp = b && b.pinned ? 1 : 0;
+        if (bp !== ap) return bp - ap;
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
+      });
   }, [notes, query, activeTag]);
 
   const editingNote = useMemo(() => {
@@ -163,6 +174,16 @@ export default function App() {
     }
   }
 
+  function togglePin(noteId) {
+    setNotes((prev) =>
+      prev.map((n) => {
+        if (n.id !== noteId) return n;
+        // Keep updatedAt stable; pinning is a list/display preference.
+        return { ...n, pinned: !Boolean(n.pinned) };
+      })
+    );
+  }
+
   return (
     <div className="appRoot">
       <Navbar
@@ -193,6 +214,7 @@ export default function App() {
             notes={filteredNotes}
             onEdit={openEdit}
             onDelete={deleteNote}
+            onTogglePin={togglePin}
           />
         )}
       </main>
